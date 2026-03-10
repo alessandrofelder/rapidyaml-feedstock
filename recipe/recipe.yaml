@@ -12,54 +12,88 @@ source:
 
 build:
   number: 0
-  script:
-    - if: win
-      then: |
-        mkdir build
-        cd build
-        cmake -G "Ninja" ^
-            -DCMAKE_BUILD_TYPE=Release ^
-            -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% ^
-            -DBUILD_SHARED_LIBS=ON ^
-            -DRYML_BUILD_TESTS=OFF ^
-            -DRYML_BUILD_BENCHMARKS=OFF ^
-            -DRYML_BUILD_TOOLS=OFF ^
-            -DRYML_BUILD_API=OFF ^
-            %SRC_DIR%
-        cmake --build . --target install
-    - if: unix
-      then: |
-        mkdir -p build
-        cd build
-        cmake ${CMAKE_ARGS} \
-            -GNinja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=$PREFIX \
-            -DBUILD_SHARED_LIBS=ON \
-            -DRYML_BUILD_TESTS=OFF \
-            -DRYML_BUILD_BENCHMARKS=OFF \
-            -DRYML_BUILD_TOOLS=OFF \
-            -DRYML_BUILD_API=OFF \
-            $SRC_DIR
-        cmake --build . --target install
 
-requirements:
-  run_exports:
-    # Pre-1.0 version; breaking changes can occur in any release
-    - ${{ pin_subpackage(name, upper_bound="x.x.x") }}
-  build:
-    - ${{ compiler('cxx') }}
-    - ${{ stdlib('c') }}
-    - cmake
-    - ninja
+outputs:
+  - package:
+      name: librapidyaml
+    build:
+      script:
+        - if: win
+          then: |
+            mkdir build
+            cd build
+            cmake -G "Ninja" ^
+                -DCMAKE_BUILD_TYPE=Release ^
+                -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% ^
+                -DBUILD_SHARED_LIBS=ON ^
+                -DRYML_BUILD_TESTS=OFF ^
+                -DRYML_BUILD_BENCHMARKS=OFF ^
+                -DRYML_BUILD_TOOLS=OFF ^
+                -DRYML_BUILD_API=OFF ^
+                %SRC_DIR%
+            cmake --build . --target install
+        - if: unix
+          then: |
+            mkdir -p build
+            cd build
+            cmake ${CMAKE_ARGS} \
+                -GNinja \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_INSTALL_PREFIX=$PREFIX \
+                -DBUILD_SHARED_LIBS=ON \
+                -DRYML_BUILD_TESTS=OFF \
+                -DRYML_BUILD_BENCHMARKS=OFF \
+                -DRYML_BUILD_TOOLS=OFF \
+                -DRYML_BUILD_API=OFF \
+                $SRC_DIR
+            cmake --build . --target install
+    requirements:
+      run_exports:
+        - ${{ pin_subpackage("librapidyaml", upper_bound="x.x.x") }}
+      build:
+        - ${{ compiler('cxx') }}
+        - ${{ stdlib('c') }}
+        - cmake
+        - ninja
+    tests:
+      - package_contents:
+          include:
+            - ryml.hpp
+            - ryml_std.hpp
+          lib:
+            - ryml
 
-tests:
-  - package_contents:
-      include:
-        - ryml.hpp
-        - ryml_std.hpp
-      lib:
-        - ryml
+  - package:
+      name: rapidyaml
+    build:
+      script:
+        - if: unix
+          then: $PYTHON -m pip install . -vv --no-deps --no-build-isolation
+        - if: win
+          then: "%PYTHON% -m pip install . -vv --no-deps --no-build-isolation"
+    requirements:
+      build:
+        - ${{ compiler('cxx') }}
+        - ${{ stdlib('c') }}
+        - cmake
+        - ninja
+        - swig
+      host:
+        - python
+        - pip
+        - setuptools
+        - setuptools-scm
+        - cmake-build-extension
+        - ${{ pin_subpackage("librapidyaml", upper_bound="x.x.x") }}
+      run:
+        - python
+        - deprecation
+        - ${{ pin_subpackage("librapidyaml", upper_bound="x.x.x") }}
+    tests:
+      - python:
+          imports:
+            - ryml
+          pip_check: true
 
 about:
   homepage: https://github.com/biojppm/rapidyaml
@@ -78,5 +112,4 @@ about:
 extra:
   recipe-maintainers:
     - chrisburr
-
   feedstock-name: rapidyaml
