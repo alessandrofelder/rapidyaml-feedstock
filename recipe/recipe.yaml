@@ -2,64 +2,66 @@ context:
   name: librapidyaml
   version: "0.11.0"
 
-package:
-  name: ${{ name }}
-  version: ${{ version }}
-
 source:
   url: https://github.com/biojppm/rapidyaml/releases/download/v${{ version }}/rapidyaml-${{ version }}-src.tgz
   sha256: 46e42f656a767b9ecaf9b903b6f6a9c72453359ee9cbf488d510d0558ff5ab78
 
 build:
   number: 0
-  script:
-    - if: win
-      then: |
-        mkdir build
-        cd build
-        cmake -G "Ninja" ^
-            -DCMAKE_BUILD_TYPE=Release ^
-            -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% ^
-            -DBUILD_SHARED_LIBS=ON ^
-            -DRYML_BUILD_TESTS=OFF ^
-            -DRYML_BUILD_BENCHMARKS=OFF ^
-            -DRYML_BUILD_TOOLS=OFF ^
-            -DRYML_BUILD_API=OFF ^
-            %SRC_DIR%
-        cmake --build . --target install
-    - if: unix
-      then: |
-        mkdir -p build
-        cd build
-        cmake ${CMAKE_ARGS} \
-            -GNinja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=$PREFIX \
-            -DBUILD_SHARED_LIBS=ON \
-            -DRYML_BUILD_TESTS=OFF \
-            -DRYML_BUILD_BENCHMARKS=OFF \
-            -DRYML_BUILD_TOOLS=OFF \
-            -DRYML_BUILD_API=OFF \
-            $SRC_DIR
-        cmake --build . --target install
 
-requirements:
-  run_exports:
-    # Pre-1.0 version; breaking changes can occur in any release
-    - ${{ pin_subpackage(name, upper_bound="x.x.x") }}
-  build:
-    - ${{ compiler('cxx') }}
-    - ${{ stdlib('c') }}
-    - cmake
-    - ninja
+outputs:
+  - package:
+      name: librapidyaml
+      version: ${{ version }}
+    build:
+      script:
+        - if: win
+          then: |
+            mkdir build
+            cd build
+            cmake -G "Ninja" ^
+                -DCMAKE_BUILD_TYPE=Release ^
+                -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% ^
+                -DBUILD_SHARED_LIBS=ON ^
+                -DRYML_BUILD_TESTS=OFF ^
+                -DRYML_BUILD_BENCHMARKS=OFF ^
+                -DRYML_BUILD_TOOLS=OFF ^
+                -DRYML_BUILD_API=OFF ^
+                %SRC_DIR%
+            cmake --build . --target install
+        - if: unix
+          then: |
+            mkdir -p build
+            cd build
+            cmake ${CMAKE_ARGS} \
+                -GNinja \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_INSTALL_PREFIX=$PREFIX \
+                -DBUILD_SHARED_LIBS=ON \
+                -DRYML_BUILD_TESTS=OFF \
+                -DRYML_BUILD_BENCHMARKS=OFF \
+                -DRYML_BUILD_TOOLS=OFF \
+                -DRYML_BUILD_API=OFF \
+                $SRC_DIR
+            cmake --build . --target install
 
-tests:
-  - package_contents:
-      include:
-        - ryml.hpp
-        - ryml_std.hpp
-      lib:
-        - ryml
+    requirements:
+      run_exports:
+        # Pre-1.0 version; breaking changes can occur in any release
+        - ${{ pin_subpackage(name, upper_bound="x.x.x") }}
+      build:
+        - ${{ compiler('cxx') }}
+        - ${{ stdlib('c') }}
+        - cmake
+        - ninja
+
+    tests:
+      - package_contents:
+          include:
+            - ryml.hpp
+            - ryml_std.hpp
+          lib:
+            - ryml
 
 about:
   homepage: https://github.com/biojppm/rapidyaml
