@@ -72,12 +72,14 @@ outputs:
       version: ${{ version }}
     build:      
       script:
-        - if: unix
-          then: SETUPTOOLS_SCM_PRETEND_VERSION=${{ version }} $PYTHON -m pip install . -vv --no-deps --no-build-isolation
-        - if: win
-          then: |
-            set SETUPTOOLS_SCM_PRETEND_VERSION=${{ version }}
-            %PYTHON% -m pip install . -vv --no-deps --no-build-isolation
+          env:
+            SETUPTOOLS_SCM_PRETEND_VERSION: ${{version}}
+          content:
+          - if: unix
+            then: $PYTHON -m pip install . -vv --no-deps --no-build-isolation
+          - if: win
+            then: |
+              %PYTHON% -m pip install . -vv --no-deps --no-build-isolation
     requirements:
       build:
         - ${{ compiler('cxx') }}
