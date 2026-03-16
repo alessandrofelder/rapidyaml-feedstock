@@ -1,13 +1,13 @@
 context:
   name: librapidyaml
-  version: "0.12.0"
+  version: "0.11.0"
 
 source:
   url: https://github.com/biojppm/rapidyaml/releases/download/v${{ version }}/rapidyaml-${{ version }}-src.tgz
   sha256: 46e42f656a767b9ecaf9b903b6f6a9c72453359ee9cbf488d510d0558ff5ab78
 
 build:
-  number: 0
+  number: 1
 
 outputs:
   - package:
