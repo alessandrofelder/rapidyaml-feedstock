@@ -63,6 +63,42 @@ outputs:
           lib:
             - ryml
 
+
+  - package:
+      name: rapidyaml
+      version: ${{ version }}
+    build:      
+      script:
+        - if: unix
+          then: SETUPTOOLS_SCM_PRETEND_VERSION=${{ version }} $PYTHON -m pip install . -vv --no-deps --no-build-isolation
+        - if: win
+          then: |
+            set SETUPTOOLS_SCM_PRETEND_VERSION=${{ version }}
+            %PYTHON% -m pip install . -vv --no-deps --no-build-isolation
+    requirements:
+      build:
+        - ${{ compiler('cxx') }}
+        - ${{ stdlib('c') }}
+        - cmake
+        - ninja
+        - swig
+      host:
+        - python
+        - pip
+        - setuptools
+        - setuptools-scm
+        - cmake-build-extension
+        - ${{ pin_subpackage("librapidyaml", upper_bound="x.x.x") }}
+      run:
+        - python
+        - deprecation
+        - ${{ pin_subpackage("librapidyaml", upper_bound="x.x.x") }}
+    tests:
+      - python:
+          imports:
+            - ryml
+          pip_check: true
+
 about:
   homepage: https://github.com/biojppm/rapidyaml
   license: MIT
